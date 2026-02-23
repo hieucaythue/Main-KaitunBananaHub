@@ -270,3 +270,85 @@ elseif choice == "Kaitun" then
 else
     showMenu()
 end
+
+-- FPS + Ping + Play Time Display
+-- Place as LocalScript in StarterPlayerScripts
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Stats = game:GetService("Stats")
+
+local player = Players.LocalPlayer
+
+-- GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "STATS_GUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = player:WaitForChild("PlayerGui")
+
+local TextLabel = Instance.new("TextLabel")
+TextLabel.Size = UDim2.new(0, 260, 0, 70)
+TextLabel.Position = UDim2.new(0, 10, 0, 10)
+TextLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+TextLabel.BackgroundTransparency = 0.2
+TextLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+TextLabel.Font = Enum.Font.SourceSansBold
+TextLabel.TextSize = 18
+TextLabel.TextXAlignment = Enum.TextXAlignment.Left
+TextLabel.TextYAlignment = Enum.TextYAlignment.Center
+TextLabel.BorderSizePixel = 0
+TextLabel.Parent = ScreenGui
+
+-- FPS variables
+local frames = 0
+local lastTime = tick()
+local fps = 0
+
+-- Time tracking
+local startTime = tick()
+
+-- Format time function
+local function formatTime(seconds)
+	local h = math.floor(seconds / 3600)
+	local m = math.floor((seconds % 3600) / 60)
+	local s = math.floor(seconds % 60)
+
+	if h > 0 then
+		return string.format("%02d:%02d:%02d", h, m, s)
+	else
+		return string.format("%02d:%02d", m, s)
+	end
+end
+
+RunService.RenderStepped:Connect(function()
+	frames += 1
+	local currentTime = tick()
+
+	if currentTime - lastTime >= 1 then
+		fps = frames
+		frames = 0
+		lastTime = currentTime
+	end
+
+	-- Ping
+	local ping = math.floor(
+		Stats.Network.ServerStatsItem["Data Ping"]:GetValue()
+	)
+
+	-- Play time
+	local playTime = tick() - startTime
+
+	-- FPS color warning
+	if fps < 30 then
+		TextLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
+	else
+		TextLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+	end
+
+	TextLabel.Text = string.format(
+		"FPS: %d\nPing: %d ms\nTime: %s",
+		fps,
+		ping,
+		formatTime(playTime)
+	)
+end)
