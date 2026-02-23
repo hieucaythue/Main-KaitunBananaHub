@@ -7,6 +7,7 @@ local RESET_NAME = "ResetMenuButton"
 local player = game.Players.LocalPlayer
 local playerName = player.Name
 local configFile = "menu_config_" .. playerName .. ".txt"
+local TweenService = game:GetService("TweenService")
 
 -- ================= FILE =================
 local function ensureConfigFile()
@@ -39,7 +40,7 @@ local function removeReset()
     end
 end
 
--- ================= RESET BUTTON =================
+-- ================= RESET BUTTON (UI ĐẸP) =================
 local function createResetButton()
     removeReset()
 
@@ -49,17 +50,25 @@ local function createResetButton()
     screenGui.ResetOnSpawn = false
     screenGui.Parent = gui
 
-    local button = Instance.new("TextButton")
-    button.Size = UDim2.new(0, 110, 0, 32)
-    button.Position = UDim2.new(1, -120, 0, 10)
-    button.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-    button.TextColor3 = Color3.new(1,1,1)
-    button.Text = "Reset Script"
-    button.Font = Enum.Font.SourceSansBold
-    button.TextSize = 16
-    button.Parent = screenGui
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0,140,0,36)
+    btn.Position = UDim2.new(1,-160,0,12)
+    btn.BackgroundColor3 = Color3.fromRGB(200,60,60)
+    btn.TextColor3 = Color3.new(1,1,1)
+    btn.Text = "🔄 Reset Script"
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 15
+    btn.Parent = screenGui
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,14)
 
-    button.MouseButton1Click:Connect(function()
+    btn.MouseEnter:Connect(function()
+        btn.BackgroundColor3 = Color3.fromRGB(230,80,80)
+    end)
+    btn.MouseLeave:Connect(function()
+        btn.BackgroundColor3 = Color3.fromRGB(200,60,60)
+    end)
+
+    btn.MouseButton1Click:Connect(function()
         if isfile(configFile) then
             delfile(configFile)
         end
@@ -167,7 +176,7 @@ getgenv().Key = "a5cf677e9a4ab10c53e220de"
 loadstring(game:HttpGet("https://raw.githubusercontent.com/obiiyeuem/vthangsitink/main/BananaCat-kaitunBF.lua"))()
 end
 
--- ================= MENU =================
+-- ================= MENU (UI ĐẸP) =================
 function showMenu()
     removeMenu()
     removeReset()
@@ -178,31 +187,75 @@ function showMenu()
     screenGui.ResetOnSpawn = false
     screenGui.Parent = gui
 
+    -- Shadow
+    local shadow = Instance.new("Frame")
+    shadow.Size = UDim2.new(0,320,0,170)
+    shadow.Position = UDim2.new(0.5,-160,0.5,-85)
+    shadow.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    shadow.BackgroundTransparency = 0.45
+    shadow.Parent = screenGui
+    Instance.new("UICorner", shadow).CornerRadius = UDim.new(0,18)
+
+    -- Main Frame
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(0,300,0,150)
     frame.Position = UDim2.new(0.5,-150,0.5,-75)
-    frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
     frame.Parent = screenGui
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0,16)
+
+    -- Title
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1,0,0,40)
+    title.BackgroundTransparency = 1
+    title.Text = "🍌 Script Selector 🍌"
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 22
+    title.TextColor3 = Color3.new(1,1,1)
+    title.Parent = frame
+
+    -- Animation
+    frame.Size = UDim2.new(0,0,0,0)
+    shadow.Size = frame.Size
+    TweenService:Create(
+        frame,
+        TweenInfo.new(0.25, Enum.EasingStyle.Back),
+        {Size = UDim2.new(0,300,0,150)}
+    ):Play()
+    TweenService:Create(
+        shadow,
+        TweenInfo.new(0.25, Enum.EasingStyle.Back),
+        {Size = UDim2.new(0,320,0,170)}
+    ):Play()
 
     local function createButton(text, yPos, color, callback)
         local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(0.8,0,0.3,0)
+        btn.Size = UDim2.new(0.8,0,0.25,0)
         btn.Position = UDim2.new(0.1,0,yPos,0)
         btn.Text = text
         btn.BackgroundColor3 = color
         btn.TextColor3 = Color3.new(1,1,1)
-        btn.Font = Enum.Font.SourceSansBold
-        btn.TextSize = 20
+        btn.Font = Enum.Font.GothamBold
+        btn.TextSize = 18
         btn.Parent = frame
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(0,12)
+
+        btn.MouseEnter:Connect(function()
+            btn.BackgroundColor3 = color:Lerp(Color3.new(1,1,1),0.15)
+        end)
+        btn.MouseLeave:Connect(function()
+            btn.BackgroundColor3 = color
+        end)
+
         btn.MouseButton1Click:Connect(callback)
     end
 
-    createButton("Main",0.15,Color3.fromRGB(255,100,100),function()
+    createButton("🍌 Main",0.38,Color3.fromRGB(255,90,90),function()
         saveChoice("Main")
         runMainScript()
     end)
 
-    createButton("Kaitun",0.55,Color3.fromRGB(0,170,255),function()
+    createButton("🍌 Kaitun",0.68,Color3.fromRGB(0,170,255),function()
         saveChoice("Kaitun")
         runKaitunScript()
     end)
@@ -210,7 +263,6 @@ end
 
 -- ================= START =================
 local choice = loadChoice()
-
 if choice == "Main" then
     runMainScript()
 elseif choice == "Kaitun" then
